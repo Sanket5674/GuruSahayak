@@ -106,11 +106,13 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '${user.roleDisplayName} • ${user.schoolOrJurisdiction}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 10.5, color: AppColors.textMedium),
+                      Expanded(
+                        child: Text(
+                          '${user.roleDisplayName} • ${user.schoolOrJurisdiction}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 10.5, color: AppColors.textMedium),
+                        ),
                       ),
                     ],
                   ),
