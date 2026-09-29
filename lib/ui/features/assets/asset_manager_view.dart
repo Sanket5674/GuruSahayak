@@ -100,21 +100,58 @@ $schoolName
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('School Assets & Infrastructure'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_download_outlined),
-            tooltip: 'Export Asset Inventory CSV',
-            onPressed: () {
-              final csv = ExportService.generateAssetsCsv(db.assets);
-              ExportService.shareTextContent(csv, 'School_Assets_Audit.csv');
-            },
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
+          // In-page header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryNavy.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.domain_rounded, color: AppColors.primaryNavy, size: 22),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'शाळा साधन संपत्ती व दुरुस्ती',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      Text(
+                        'School Infrastructure Ledger & BEO Requisition',
+                        style: TextStyle(fontSize: 11, color: AppColors.textMedium),
+                      ),
+                    ],
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    final csv = ExportService.generateAssetsCsv(db.assets);
+                    ExportService.shareTextContent(csv, 'School_Assets_Audit.csv');
+                  },
+                  icon: const Icon(Icons.file_download_outlined, size: 16),
+                  label: const Text('Export CSV', style: TextStyle(fontSize: 11.5)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
+            ),
+          ),
           // Category filter bar
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -248,6 +285,7 @@ $schoolName
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'asset_manager_fab',
         backgroundColor: AppColors.primaryNavy,
         onPressed: () {
           showDialog(

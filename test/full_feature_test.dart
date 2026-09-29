@@ -31,7 +31,9 @@ void main() {
       auth = AuthService();
     });
 
-    test('Default user starts as Class Teacher with Class 4-A assignment', () {
+    test('Default user starts logged out on Login Screen, login switches state', () {
+      expect(auth.isLoggedIn, isFalse);
+      auth.switchRole(UserRole.teacher);
       expect(auth.isLoggedIn, isTrue);
       expect(auth.currentRole, equals(UserRole.teacher));
       expect(auth.isTeacher, isTrue);

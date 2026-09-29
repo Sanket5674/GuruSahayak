@@ -151,16 +151,21 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.textMedium, size: 20),
-            tooltip: 'Sign Out',
-            onPressed: () => auth.logout(),
+            icon: const Icon(Icons.logout_rounded, color: AppColors.dangerRed, size: 21),
+            tooltip: 'Sign Out (लॉगआउट)',
+            onPressed: () => _confirmLogout(context, auth),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: pages,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: IndexedStack(
+            index: _currentIndex,
+            children: pages,
+          ),
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
@@ -203,14 +208,53 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     );
   }
 
+  void _confirmLogout(BuildContext context, AuthService auth) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.logout_rounded, color: AppColors.dangerRed),
+            SizedBox(width: 8),
+            Text('लॉगआउट (Sign Out)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ],
+        ),
+        content: const Text(
+          'आपण खात्यातून बाहेर पडू इच्छिता का?\nAre you sure you want to sign out from GuruSahayak?',
+          style: TextStyle(fontSize: 13, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('रद्द करा (Cancel)'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              auth.logout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.dangerRed,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('होय, लॉगआउट (Sign Out)'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showRoleSwitchSheet(BuildContext context, AuthService auth) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) {
-        return Container(
+        return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,

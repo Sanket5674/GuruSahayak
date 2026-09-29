@@ -59,19 +59,58 @@ class _CircularTasksViewState extends State<CircularTasksView> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Government Circulars & Tasks'),
-        actions: [
-          if (auth.isOfficer || auth.isHeadmaster)
-            IconButton(
-              icon: const Icon(Icons.auto_awesome_rounded),
-              tooltip: 'Parse New Circular (AI)',
-              onPressed: () => _scanAndBroadcastCircular(context),
-            ),
-        ],
-      ),
+      backgroundColor: AppColors.backgroundLight,
       body: Column(
         children: [
+          // In-page header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.saffronOrange.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.rule_folder_rounded, color: AppColors.saffronOrange, size: 22),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'शासन निर्णय व कार्यप्रणाली',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      Text(
+                        'GR Circulars & Automated Action Checklist',
+                        style: TextStyle(fontSize: 11, color: AppColors.textMedium),
+                      ),
+                    ],
+                  ),
+                ),
+                if (auth.isOfficer || auth.isHeadmaster)
+                  ElevatedButton.icon(
+                    onPressed: () => _scanAndBroadcastCircular(context),
+                    icon: const Icon(Icons.auto_awesome_rounded, size: 16),
+                    label: const Text('AI Parse GR', style: TextStyle(fontSize: 11.5)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.saffronOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           // Filter Chips
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -178,6 +217,7 @@ class _CircularTasksViewState extends State<CircularTasksView> {
       ),
       floatingActionButton: (auth.isOfficer || auth.isHeadmaster)
           ? FloatingActionButton.extended(
+              heroTag: 'circular_tasks_fab',
               backgroundColor: AppColors.accentSaffron,
               onPressed: () => _scanAndBroadcastCircular(context),
               icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),

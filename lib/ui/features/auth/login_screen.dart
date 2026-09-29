@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../core/app_colors.dart';
 import '../../../data/models/user_profile.dart';
 import '../../../data/services/auth_service.dart';
-import '../dashboard/main_navigation_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,24 +11,30 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
   UserRole _selectedRole = UserRole.teacher;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
 
   @override
   void dispose() {
     _phoneController.dispose();
     _nameController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   void _loginAsDemo(UserRole role) {
     final auth = Provider.of<AuthService>(context, listen: false);
     auth.switchRole(role);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainNavigationShell()),
-    );
+    // Reactive Consumer in main.dart will automatically switch to MainNavigationShell
   }
 
   void _loginWithForm() {
@@ -38,262 +43,366 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (phone.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid 10-digit mobile number')),
+        const SnackBar(
+          backgroundColor: AppColors.dangerRed,
+          content: Text('कृपया १० अंकी वैध मोबाईल नंबर प्रविष्ट करा (Enter 10-digit mobile number)'),
+        ),
       );
       return;
     }
 
     final auth = Provider.of<AuthService>(context, listen: false);
     auth.loginWithPhone(phone, name, _selectedRole);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainNavigationShell()),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: const Color(0xFFF1F5F9),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 10),
-              // App Brand Header
-              Center(
-                child: Container(
-                  width: 76,
-                  height: 76,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryNavy,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primaryNavy.withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Government Tricolor Top Accent Strip
+                  Container(
+                    height: 5,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.saffronOrange,
+                          Colors.white,
+                          AppColors.successGreen,
+                        ],
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.school_rounded,
-                    color: Colors.white,
-                    size: 42,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Center(
-                child: Text(
-                  'GuruSahayak',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primaryNavy,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ),
-              const Center(
-                child: Text(
-                  'गुरुसहायक • प्राथमिक शिक्षण कार्यप्रणाली',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.accentSaffron,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Center(
-                child: Text(
-                  'All-in-One Offline OS for Government Primary Schools',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // 1-Click Instant Evaluation Demo Box
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.cardBorder),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  ),
+                  const SizedBox(height: 18),
+
+                  // App Logo & Official Branding Header
+                  Center(
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primaryNavy, Color(0xFF1E40AF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryNavy.withOpacity(0.25),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.school_rounded,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Center(
+                    child: Text(
+                      'गुरुसहायक',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primaryNavy,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                  const Center(
+                    child: Text(
+                      'GuruSahayak • प्राथमिक शाळा एकात्मिक प्रणाली',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.accentSaffron,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Center(
+                    child: Text(
+                      'Unified Offline OS for Govt Primary Schools (ZP / Municipal)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Modern Card Container
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.cardBorder),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Icon(Icons.flash_on_rounded, color: AppColors.accentSaffron, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          '1-Click Demo Evaluation',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textDark,
+                        // Tab Selector
+                        Container(
+                          margin: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TabBar(
+                            controller: _tabController,
+                            indicator: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            labelColor: AppColors.primaryNavy,
+                            unselectedLabelColor: AppColors.textMuted,
+                            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            tabs: const [
+                              Tab(
+                                icon: Icon(Icons.flash_on_rounded, size: 18),
+                                text: '१-क्लिक डेमो प्रवेश',
+                              ),
+                              Tab(
+                                icon: Icon(Icons.phone_android_rounded, size: 18),
+                                text: 'मोबाईल लॉगिन',
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Tab Content
+                        SizedBox(
+                          height: 330,
+                          child: TabBarView(
+                            controller: _tabController,
+                            children: [
+                              // Tab 1: 1-Click Demo Roles
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _buildRoleCard(
+                                      title: 'वर्गशिक्षक (Class Teacher)',
+                                      subtitle: 'सुरेश पाटील • इयत्ता ४-थी अ • १-टॅप हजेरी व पोषण आहार गणित',
+                                      icon: Icons.person_rounded,
+                                      accentColor: AppColors.successGreen,
+                                      badge: 'Teacher',
+                                      role: UserRole.teacher,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _buildRoleCard(
+                                      title: 'मुख्याध्यापक (Headmaster / Admin)',
+                                      subtitle: 'सुनिता देशमुख • शाळा साधन संपत्ती व पोषण आहार साठा ऑडिट',
+                                      icon: Icons.admin_panel_settings_rounded,
+                                      accentColor: AppColors.saffronOrange,
+                                      badge: 'Admin',
+                                      role: UserRole.headmaster,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _buildRoleCard(
+                                      title: 'शिक्षणाधिकारी (BEO / Officer)',
+                                      subtitle: 'डॉ. आनंद कुलकर्णी • हवेली तालुका २४ शाळा व सर्वेक्षण निर्मिती',
+                                      icon: Icons.account_balance_rounded,
+                                      accentColor: AppColors.primaryNavy,
+                                      badge: 'SuperAdmin',
+                                      role: UserRole.officer,
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Tab 2: Mobile Number Form
+                              SingleChildScrollView(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    TextField(
+                                      controller: _phoneController,
+                                      keyboardType: TextInputType.phone,
+                                      decoration: const InputDecoration(
+                                        labelText: 'मोबाईल नंबर (Mobile Number)',
+                                        hintText: '१० अंकी मोबाईल नंबर टाका',
+                                        prefixIcon: Icon(Icons.phone_android_rounded, size: 20),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextField(
+                                      controller: _nameController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'शिक्षकाचे नाव (Full Name)',
+                                        hintText: 'उदा. रमेश पाटील',
+                                        prefixIcon: Icon(Icons.badge_outlined, size: 20),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    DropdownButtonFormField<UserRole>(
+                                      value: _selectedRole,
+                                      decoration: const InputDecoration(
+                                        labelText: 'पद / हुद्दा (Designation)',
+                                        prefixIcon: Icon(Icons.work_outline_rounded, size: 20),
+                                      ),
+                                      items: UserRole.values.map((r) {
+                                        return DropdownMenuItem(
+                                          value: r,
+                                          child: Text(r.displayName, style: const TextStyle(fontSize: 13)),
+                                        );
+                                      }).toList(),
+                                      onChanged: (val) {
+                                        if (val != null) setState(() => _selectedRole = val);
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      onPressed: _loginWithForm,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primaryNavy,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                      icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                                      label: const Text('प्रवेश करा (Enter Portal)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Choose a role to experience its dedicated workflow immediately:',
-                      style: TextStyle(fontSize: 11.5, color: AppColors.textMuted),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDemoRoleButton(
-                      title: 'Class Teacher (वर्गशिक्षक)',
-                      subtitle: 'Suresh Patil • 1-Tap MDM & Student Vault',
-                      icon: Icons.person_rounded,
-                      color: AppColors.teacherBadge,
-                      role: UserRole.teacher,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDemoRoleButton(
-                      title: 'Headmaster (मुख्याध्यापक)',
-                      subtitle: 'Sunita Deshmukh • School Assets & MDM Stock',
-                      icon: Icons.admin_panel_settings_rounded,
-                      color: AppColors.headmasterBadge,
-                      role: UserRole.headmaster,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDemoRoleButton(
-                      title: 'Cluster / BEO Officer (शिक्षणाधिकारी)',
-                      subtitle: 'Dr. Anand Kulkarni • 24 Schools & Survey Builder',
-                      icon: Icons.account_balance_rounded,
-                      color: AppColors.officerBadge,
-                      role: UserRole.officer,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  const Expanded(child: Divider(color: AppColors.cardBorder)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('OR LOGIN WITH MOBILE', style: TextStyle(fontSize: 11, color: AppColors.textLight, fontWeight: FontWeight.w600)),
                   ),
-                  const Expanded(child: Divider(color: AppColors.cardBorder)),
+
+                  const SizedBox(height: 20),
+                  // Offline Guarantee Banner
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.successGreen),
+                        SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '१००% सुरक्षित व इंटरनेटशिवाय चालणारे (Offline SQLite)',
+                            style: TextStyle(fontSize: 11.5, color: AppColors.textDark, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 18),
-
-              // Mobile Phone Entry
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Mobile Number (मोबाईल नंबर)',
-                  hintText: 'Enter 10-digit registered number',
-                  prefixIcon: Icon(Icons.phone_android_rounded, size: 20),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Educator Name (नाव)',
-                  hintText: 'e.g. Ramesh Patil',
-                  prefixIcon: Icon(Icons.badge_outlined, size: 20),
-                ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<UserRole>(
-                value: _selectedRole,
-                decoration: const InputDecoration(
-                  labelText: 'Designation / Role (पद)',
-                  prefixIcon: Icon(Icons.work_outline_rounded, size: 20),
-                ),
-                items: UserRole.values.map((r) {
-                  return DropdownMenuItem(
-                    value: r,
-                    child: Text(r.displayName, style: const TextStyle(fontSize: 13)),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedRole = val);
-                },
-              ),
-              const SizedBox(height: 18),
-
-              ElevatedButton.icon(
-                onPressed: _loginWithForm,
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                label: const Text('Proceed to School Portal'),
-              ),
-              const SizedBox(height: 16),
-              const Center(
-                child: Text(
-                  '🔒 100% Offline Capable • Local Encrypted Storage',
-                  style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDemoRoleButton({
+  Widget _buildRoleCard({
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color color,
+    required Color accentColor,
+    required String badge,
     required UserRole role,
   }) {
     return InkWell(
       onTap: () => _loginAsDemo(role),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.3)),
+          color: accentColor.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: accentColor.withOpacity(0.35)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
+                color: accentColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: accentColor, size: 22),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textDark,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: accentColor.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          badge,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: accentColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
@@ -303,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: color, size: 20),
+            Icon(Icons.arrow_forward_ios_rounded, color: accentColor, size: 16),
           ],
         ),
       ),

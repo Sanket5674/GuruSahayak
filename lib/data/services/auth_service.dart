@@ -3,7 +3,7 @@ import '../models/user_profile.dart';
 
 class AuthService extends ChangeNotifier {
   UserProfile _currentUser = _defaultTeacher;
-  bool _isLoggedIn = true;
+  bool _isLoggedIn = false;
 
   UserProfile get currentUser => _currentUser;
   UserRole get currentRole => _currentUser.role;
