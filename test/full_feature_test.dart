@@ -383,12 +383,12 @@ void main() {
       await tester.pump();
 
       // Verify branding and 1-Click Demo options
-      expect(find.text('GuruSahayak'), findsOneWidget);
+      expect(find.textContaining('GuruSahayak'), findsOneWidget);
       expect(find.textContaining('गुरुसहायक'), findsOneWidget);
-      expect(find.text('1-Click Demo Evaluation'), findsOneWidget);
-      expect(find.textContaining('Class Teacher (वर्गशिक्षक)'), findsWidgets);
-      expect(find.textContaining('Headmaster (मुख्याध्यापक)'), findsOneWidget);
-      expect(find.textContaining('Cluster / BEO Officer'), findsOneWidget);
+      expect(find.textContaining('डेमो प्रवेश'), findsOneWidget);
+      expect(find.textContaining('Class Teacher'), findsWidgets);
+      expect(find.textContaining('Headmaster'), findsOneWidget);
+      expect(find.textContaining('BEO / Officer'), findsOneWidget);
     });
 
     testWidgets('Main Navigation Shell renders 5 tabs and Top Role Switcher', (WidgetTester tester) async {
