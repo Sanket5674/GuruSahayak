@@ -6,7 +6,10 @@ import 'package:gurusahayak/data/models/student.dart';
 import 'package:gurusahayak/data/models/circular_task.dart';
 import 'package:gurusahayak/data/models/school_asset.dart';
 import 'package:gurusahayak/data/models/dynamic_form.dart';
+import 'package:gurusahayak/data/models/school.dart';
+import 'package:gurusahayak/data/models/teacher.dart';
 import 'package:gurusahayak/data/services/auth_service.dart';
+import 'package:gurusahayak/data/services/locale_service.dart';
 import 'package:gurusahayak/data/services/local_database_service.dart';
 import 'package:gurusahayak/data/services/ocr_parser_service.dart';
 import 'package:gurusahayak/data/services/export_service.dart';
@@ -20,6 +23,7 @@ import 'package:gurusahayak/ui/features/students/student_vault_view.dart';
 import 'package:gurusahayak/ui/features/tasks/circular_tasks_view.dart';
 import 'package:gurusahayak/ui/features/assets/asset_manager_view.dart';
 import 'package:gurusahayak/ui/features/forms/dynamic_forms_view.dart';
+import 'package:gurusahayak/ui/features/portal/portal_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -53,12 +57,22 @@ void main() {
       expect(auth.currentUser.assignedClass, contains('All Classes'));
     });
 
+    test('1-Click role switch to System Administrator (Admin) with Multi-School oversight', () {
+      auth.switchRole(UserRole.admin);
+      expect(auth.currentRole, equals(UserRole.admin));
+      expect(auth.isAdmin, isTrue);
+      expect(auth.currentUser.name, contains('Admin'));
+      expect(auth.currentUser.roleDisplayName, contains('Administrator'));
+      expect(auth.currentUser.clusterName, contains('12 Schools'));
+      expect(auth.currentUser.schoolOrJurisdiction, contains('District Education Office'));
+    });
+
     test('1-Click role switch to Block Education Officer (SuperAdmin)', () {
       auth.switchRole(UserRole.officer);
       expect(auth.currentRole, equals(UserRole.officer));
       expect(auth.isOfficer, isTrue);
       expect(auth.currentUser.name, contains('Dr. Anand Kulkarni'));
-      expect(auth.currentUser.clusterName, contains('24 Schools'));
+      expect(auth.currentUser.clusterName, contains('12 Schools'));
       expect(auth.currentUser.schoolOrJurisdiction, contains('Haveli'));
     });
 
@@ -387,7 +401,7 @@ void main() {
       expect(find.textContaining('गुरुसहायक'), findsOneWidget);
       expect(find.textContaining('डेमो प्रवेश'), findsOneWidget);
       expect(find.textContaining('Class Teacher'), findsWidgets);
-      expect(find.textContaining('Headmaster'), findsOneWidget);
+      expect(find.textContaining('Headmaster'), findsWidgets);
       expect(find.textContaining('BEO / Officer'), findsOneWidget);
     });
 
@@ -477,6 +491,199 @@ void main() {
       await tester.pump();
       expect(find.byType(OfficerDashboardView), findsOneWidget);
       expect(find.text('BEO Officer'), findsOneWidget); // badge updated
+
+      // Switch to Admin
+      auth.switchRole(UserRole.admin);
+      await tester.pump();
+      expect(find.byType(OfficerDashboardView), findsOneWidget);
+      expect(find.text('Admin'), findsOneWidget);
+    });
+  });
+
+  group('9. Bilingual Engine & LocaleService Tests', () {
+    test('Default language starts in English and toggles to Marathi dynamically', () {
+      final locale = LocaleService();
+      expect(locale.language, equals(AppLanguage.english));
+      expect(locale.isEnglish, isTrue);
+      expect(locale.isMarathi, isFalse);
+      expect(locale.languageCode, equals('en'));
+
+      // Translation helper
+      expect(locale.t('Student Management', 'विद्यार्थी व्यवस्थापन'), equals('Student Management'));
+      expect(locale.portalTitle, equals('Government School Management Portal'));
+
+      // Toggle to Marathi
+      locale.toggleLanguage();
+      expect(locale.language, equals(AppLanguage.marathi));
+      expect(locale.isMarathi, isTrue);
+      expect(locale.isEnglish, isFalse);
+      expect(locale.languageCode, equals('mr'));
+      expect(locale.t('Student Management', 'विद्यार्थी व्यवस्थापन'), equals('विद्यार्थी व्यवस्थापन'));
+      expect(locale.portalTitle, equals('शासकीय शाळा व्यवस्थापन पोर्टल'));
+
+      // Toggle back
+      locale.setLanguage(AppLanguage.english);
+      expect(locale.isEnglish, isTrue);
+    });
+  });
+
+  group('10. Multi-School Platform & Teacher Management Tests', () {
+    late LocalDatabaseService db;
+
+    setUp(() async {
+      db = LocalDatabaseService();
+      await db.init();
+    });
+
+    test('12 Seed Schools loaded with UDISE codes and composite student/teacher metrics', () {
+      expect(db.schools.length, equals(12));
+      final School primary = db.schools.first;
+      expect(primary.nameEn, contains('ZP'));
+      expect(primary.udiseCode, startsWith('2725'));
+      expect(primary.district, equals('Pune'));
+      expect(primary.totalStudents, isPositive);
+      expect(primary.totalTeachers, isPositive);
+    });
+
+    test('School filter changes selected school and updates filtered teachers list', () {
+      expect(db.selectedSchoolId, equals('ALL'));
+      expect(db.filteredTeachers.length, equals(8));
+
+      // Filter by School 1
+      db.setSelectedSchool('SCH_01');
+      expect(db.selectedSchoolId, equals('SCH_01'));
+      expect(db.filteredTeachers.every((t) => t.schoolId == 'SCH_01'), isTrue);
+
+      // Reset to ALL
+      db.setSelectedSchool('ALL');
+      expect(db.filteredTeachers.length, equals(8));
+    });
+
+    test('Teacher CRUD operations (Add, Update, Delete) are persistent in state', () {
+      final initialCount = db.teachers.length;
+      const newTeacher = Teacher(
+        id: 'TCH_NEW_99',
+        employeeId: 'MH2024999',
+        name: 'M. Shinde',
+        subject: 'Mathematics',
+        gradesAssigned: '8-10',
+        phone: '9890123456',
+        email: 'mshinde@gurusahayak.gov.in',
+        schoolId: 'SCH_01',
+        status: 'Active',
+        designation: 'Math Specialist',
+      );
+
+      db.addTeacher(newTeacher);
+      expect(db.teachers.length, equals(initialCount + 1));
+      expect(db.teachers.any((t) => t.id == 'TCH_NEW_99'), isTrue);
+
+      // Update teacher status
+      final updated = newTeacher.copyWith(status: 'On Leave');
+      db.updateTeacher(updated);
+      expect(db.teachers.firstWhere((t) => t.id == 'TCH_NEW_99').status, equals('On Leave'));
+
+      // Delete teacher
+      db.deleteTeacher('TCH_NEW_99');
+      expect(db.teachers.length, equals(initialCount));
+      expect(db.teachers.any((t) => t.id == 'TCH_NEW_99'), isFalse);
+    });
+
+    test('Dynamic Government Form status approval lifecycle', () {
+      expect(db.forms.isNotEmpty, isTrue);
+      final form = db.forms.first;
+
+      db.updateFormStatus(form.id, 'Approved');
+      expect(db.forms.firstWhere((f) => f.id == form.id).status, equals('Approved'));
+      expect(db.forms.firstWhere((f) => f.id == form.id).isSubmitted, isTrue);
+
+      db.updateFormStatus(form.id, 'Rejected');
+      expect(db.forms.firstWhere((f) => f.id == form.id).status, equals('Rejected'));
+    });
+  });
+
+  group('11. Government School Management Portal UI (PortalShell) Integration Tests', () {
+    testWidgets('PortalShell renders dynamic Role-Specific Dashboards & Navigation for all 4 profiles', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final auth = AuthService();
+      final db = LocalDatabaseService();
+      final locale = LocaleService();
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthService>.value(value: auth),
+            ChangeNotifierProvider<LocalDatabaseService>.value(value: db),
+            ChangeNotifierProvider<LocaleService>.value(value: locale),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const PortalShell(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Top Header elements
+      expect(find.text('EN'), findsOneWidget);
+      expect(find.text('मराठी'), findsOneWidget);
+
+      // --- 1. Class Teacher Profile Verification ---
+      // Teacher sidebar items
+      expect(find.text('Classroom Dashboard'), findsWidgets);
+      expect(find.text('Daily Attendance'), findsWidgets);
+      expect(find.text('My Students'), findsWidgets);
+      expect(find.text('My Tasks & Circulars'), findsWidgets);
+      expect(find.text('Class Surveys'), findsWidgets);
+      // Teacher should NOT see Admin or Officer items
+      expect(find.text('Central Command'), findsNothing);
+      expect(find.text('School Oversight'), findsNothing);
+      expect(find.text('Teacher Management'), findsNothing);
+
+      // Teacher dashboard metrics
+      expect(find.text('Class Strength'), findsOneWidget);
+      expect(find.text('Present Today'), findsOneWidget);
+
+      // Toggle to Marathi live for Teacher
+      locale.toggleLanguage();
+      await tester.pumpAndSettle();
+      expect(find.text('माझा वर्ग डॅशबोर्ड'), findsWidgets);
+      expect(find.text('वर्ग संख्या'), findsOneWidget);
+      locale.toggleLanguage(); // Switch back to EN
+      await tester.pumpAndSettle();
+
+      // --- 2. Headmaster Profile Verification ---
+      auth.switchRole(UserRole.headmaster);
+      await tester.pumpAndSettle();
+
+      expect(find.text('School Dashboard'), findsWidgets);
+      expect(find.text('School Teachers'), findsWidgets);
+      expect(find.text('MDM & Ration'), findsWidgets);
+      expect(find.text('Staff on Duty'), findsOneWidget);
+      expect(find.text('PM-POSHAN (MDM)'), findsOneWidget);
+
+      // --- 3. Education Officer Profile Verification ---
+      auth.switchRole(UserRole.officer);
+      await tester.pumpAndSettle();
+
+      expect(find.text('School Oversight'), findsWidgets);
+      expect(find.text('Teacher Directory'), findsWidgets);
+      expect(find.text('Approvals & Sanctions'), findsWidgets);
+      expect(find.text('Monitored Schools'), findsOneWidget);
+      expect(find.text('Pending Sanctions'), findsOneWidget);
+
+      // --- 4. Administrator Profile Verification ---
+      auth.switchRole(UserRole.admin);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dashboard'), findsWidgets);
+      expect(find.text('Teacher Management'), findsWidgets);
+      expect(find.text('Total Schools'), findsOneWidget);
+      expect(find.text('Total Students'), findsOneWidget);
     });
   });
 }

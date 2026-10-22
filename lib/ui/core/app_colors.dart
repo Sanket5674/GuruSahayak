@@ -27,9 +27,22 @@ class AppColors {
   static const Color textLight = Color(0xFF94A3B8);
 
   // Role Badges
+  static const Color adminBadge = Color(0xFF1E3A8A);
   static const Color teacherBadge = Color(0xFF2563EB);
   static const Color headmasterBadge = Color(0xFF7C3AED);
   static const Color officerBadge = Color(0xFFD97706);
+
+  // Portal Specific Palette
+  static const Color sidebarNavy = Color(0xFF0F172A);
+  static const Color sidebarNavActive = Color(0xFF2563EB);
+  static const Color sidebarNavHover = Color(0xFF1E293B);
+  static const Color sidebarTextMuted = Color(0xFF94A3B8);
+
+  // Metric Accents
+  static const Color metricEmerald = Color(0xFF10B981);
+  static const Color metricBlue = Color(0xFF2563EB);
+  static const Color metricPurple = Color(0xFF8B5CF6);
+  static const Color metricAmber = Color(0xFFF59E0B);
 
   // Common aliases
   static const Color textMedium = Color(0xFF64748B);

@@ -1,29 +1,47 @@
 enum UserRole {
-  teacher,
-  headmaster,
+  admin,
   officer,
+  headmaster,
+  teacher,
 }
 
 extension UserRoleExtension on UserRole {
   String get displayName {
     switch (this) {
-      case UserRole.teacher:
-        return 'Class Teacher (वर्गशिक्षक)';
-      case UserRole.headmaster:
-        return 'Headmaster (मुख्याध्यापक)';
+      case UserRole.admin:
+        return 'System Administrator (प्रशासक)';
       case UserRole.officer:
         return 'Cluster/Block Officer (गटशिक्षणाधिकारी)';
+      case UserRole.headmaster:
+        return 'Headmaster (मुख्याध्यापक)';
+      case UserRole.teacher:
+        return 'Class Teacher (वर्गशिक्षक)';
     }
   }
 
   String get shortName {
     switch (this) {
-      case UserRole.teacher:
-        return 'Teacher';
-      case UserRole.headmaster:
-        return 'Headmaster';
+      case UserRole.admin:
+        return 'Admin';
       case UserRole.officer:
         return 'Officer';
+      case UserRole.headmaster:
+        return 'Headmaster';
+      case UserRole.teacher:
+        return 'Teacher';
+    }
+  }
+
+  String get marathiName {
+    switch (this) {
+      case UserRole.admin:
+        return 'प्रशासक';
+      case UserRole.officer:
+        return 'गटशिक्षणाधिकारी';
+      case UserRole.headmaster:
+        return 'मुख्याध्यापक';
+      case UserRole.teacher:
+        return 'वर्गशिक्षक';
     }
   }
 }
@@ -56,7 +74,14 @@ class UserProfile {
   });
 
   String get roleDisplayName => role.displayName;
-  String get schoolOrJurisdiction => role == UserRole.officer ? '$clusterName • $blockTaluka' : schoolName;
+  String get schoolOrJurisdiction {
+    if (role == UserRole.admin) {
+      return 'District Education Office (जिल्हा शिक्षण विभाग)';
+    } else if (role == UserRole.officer) {
+      return '$clusterName • $blockTaluka';
+    }
+    return schoolName;
+  }
 
   Map<String, dynamic> toMap() {
     return {

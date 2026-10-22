@@ -52,6 +52,7 @@ class DynamicForm {
   final String deadline;
   final List<FormQuestion> questions;
   bool isSubmitted;
+  String status; // 'Pending', 'Submitted', 'Approved', 'Rejected', 'Under Review'
   Map<String, String> responses;
 
   DynamicForm({
@@ -62,6 +63,7 @@ class DynamicForm {
     required this.deadline,
     required this.questions,
     this.isSubmitted = false,
+    this.status = 'Pending',
     this.responses = const {},
   });
 }

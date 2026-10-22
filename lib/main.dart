@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'ui/core/app_theme.dart';
 import 'data/services/auth_service.dart';
+import 'data/services/locale_service.dart';
 import 'data/services/local_database_service.dart';
 import 'ui/features/auth/login_screen.dart';
-import 'ui/features/dashboard/main_navigation_shell.dart';
+import 'ui/features/portal/portal_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() async {
   );
 
   final authService = AuthService();
+  final localeService = LocaleService();
   final localDb = LocalDatabaseService();
   await localDb.init();
 
@@ -26,6 +28,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthService>.value(value: authService),
+        ChangeNotifierProvider<LocaleService>.value(value: localeService),
         ChangeNotifierProvider<LocalDatabaseService>.value(value: localDb),
       ],
       child: const GuruSahayakApp(),
@@ -38,13 +41,15 @@ class GuruSahayakApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Provider.of<LocaleService>(context);
+
     return MaterialApp(
-      title: 'गुरुसहायक | GuruSahayak',
+      title: locale.portalTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: Consumer<AuthService>(
         builder: (context, auth, _) {
-          return auth.isLoggedIn ? const MainNavigationShell() : const LoginScreen();
+          return auth.isLoggedIn ? const PortalShell() : const LoginScreen();
         },
       ),
     );

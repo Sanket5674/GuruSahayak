@@ -9,11 +9,26 @@ class AuthService extends ChangeNotifier {
   UserRole get currentRole => _currentUser.role;
   bool get isLoggedIn => _isLoggedIn;
 
+  bool get isAdmin => _currentUser.role == UserRole.admin;
   bool get isTeacher => _currentUser.role == UserRole.teacher;
   bool get isHeadmaster => _currentUser.role == UserRole.headmaster;
   bool get isOfficer => _currentUser.role == UserRole.officer;
 
   // 1-Click Demo Profiles for instant review
+  static final UserProfile _defaultAdmin = UserProfile(
+    id: 'ADM_001',
+    name: 'Admin (प्रशासक)',
+    email: 'admin@gurusahayak.gov.in',
+    phone: '+91 98230 00112',
+    role: UserRole.admin,
+    schoolName: 'District Education Office, Pune',
+    udiseCode: '27250000000',
+    clusterName: 'Pune District (12 Schools)',
+    blockTaluka: 'Haveli / Pune City',
+    district: 'Pune',
+    assignedClass: 'Portal Administrator',
+  );
+
   static final UserProfile _defaultTeacher = UserProfile(
     id: 'TCH_101',
     name: 'Suresh Patil (सुरेश पाटील)',
@@ -50,7 +65,7 @@ class AuthService extends ChangeNotifier {
     role: UserRole.officer,
     schoolName: 'BEO Education Office, Haveli Block',
     udiseCode: '27250100000',
-    clusterName: 'Haveli Taluka (24 Schools)',
+    clusterName: 'Haveli Taluka (12 Schools)',
     blockTaluka: 'Haveli',
     district: 'Pune',
     assignedClass: 'Cluster Administrator',
@@ -59,6 +74,9 @@ class AuthService extends ChangeNotifier {
   void switchRole(UserRole role) {
     _isLoggedIn = true;
     switch (role) {
+      case UserRole.admin:
+        _currentUser = _defaultAdmin;
+        break;
       case UserRole.teacher:
         _currentUser = _defaultTeacher;
         break;

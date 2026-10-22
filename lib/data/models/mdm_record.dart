@@ -24,6 +24,7 @@ class MdmRecord {
   });
 
   int get totalStudentsServed => primaryPresent + upperPrimaryPresent;
+  int get eggsFruitCount => eggsOrBananas;
 
   // Auto-calculated official PM-POSHAN consumption norms
   static MdmRecord calculateForDay({

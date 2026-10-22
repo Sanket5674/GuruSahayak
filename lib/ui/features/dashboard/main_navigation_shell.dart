@@ -36,6 +36,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         activeDashboard = const HeadmasterDashboardView();
         break;
       case UserRole.officer:
+      case UserRole.admin:
         activeDashboard = const OfficerDashboardView();
         break;
     }
@@ -396,6 +397,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         return AppColors.saffronOrange.withOpacity(0.12);
       case UserRole.officer:
         return AppColors.primaryNavy.withOpacity(0.1);
+      case UserRole.admin:
+        return AppColors.adminBadge.withOpacity(0.1);
     }
   }
 
@@ -407,6 +410,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         return AppColors.saffronOrange.withOpacity(0.4);
       case UserRole.officer:
         return AppColors.primaryNavy.withOpacity(0.4);
+      case UserRole.admin:
+        return AppColors.adminBadge.withOpacity(0.4);
     }
   }
 
@@ -418,6 +423,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         return const Color(0xFFC75B00);
       case UserRole.officer:
         return AppColors.primaryNavy;
+      case UserRole.admin:
+        return AppColors.adminBadge;
     }
   }
 
@@ -429,6 +436,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         return 'Headmaster';
       case UserRole.officer:
         return 'BEO Officer';
+      case UserRole.admin:
+        return 'Admin';
     }
   }
 }

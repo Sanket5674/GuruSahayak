@@ -201,40 +201,49 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                         // Tab Content
                         SizedBox(
-                          height: 330,
+                          height: 400,
                           child: TabBarView(
                             controller: _tabController,
                             children: [
                               // Tab 1: 1-Click Demo Roles
-                              Padding(
+                              SingleChildScrollView(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _buildRoleCard(
+                                      title: 'प्रशासक (System Admin)',
+                                      subtitle: 'डॉ. राजेश शर्मा • जिल्हा शिक्षण विभाग • १२ शाळा',
+                                      icon: Icons.shield_rounded,
+                                      accentColor: AppColors.primaryNavy,
+                                      badge: 'Admin',
+                                      role: UserRole.admin,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildRoleCard(
                                       title: 'वर्गशिक्षक (Class Teacher)',
-                                      subtitle: 'सुरेश पाटील • इयत्ता ४-थी अ • १-टॅप हजेरी व पोषण आहार गणित',
+                                      subtitle: 'सुरेश पाटील • इयत्ता ४-थी अ • हजेरी व पोषण आहार',
                                       icon: Icons.person_rounded,
                                       accentColor: AppColors.successGreen,
                                       badge: 'Teacher',
                                       role: UserRole.teacher,
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 8),
                                     _buildRoleCard(
                                       title: 'मुख्याध्यापक (Headmaster / Admin)',
-                                      subtitle: 'सुनिता देशमुख • शाळा साधन संपत्ती व पोषण आहार साठा ऑडिट',
+                                      subtitle: 'सुनिता देशमुख • शाळा साधन संपत्ती व साठा ऑडिट',
                                       icon: Icons.admin_panel_settings_rounded,
                                       accentColor: AppColors.saffronOrange,
-                                      badge: 'Admin',
+                                      badge: 'Headmaster',
                                       role: UserRole.headmaster,
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 8),
                                     _buildRoleCard(
                                       title: 'शिक्षणाधिकारी (BEO / Officer)',
-                                      subtitle: 'डॉ. आनंद कुलकर्णी • हवेली तालुका २४ शाळा व सर्वेक्षण निर्मिती',
+                                      subtitle: 'डॉ. आनंद कुलकर्णी • हवेली तालुका १२ शाळा व सर्वेक्षण',
                                       icon: Icons.account_balance_rounded,
-                                      accentColor: AppColors.primaryNavy,
-                                      badge: 'SuperAdmin',
+                                      accentColor: const Color(0xFF7C3AED),
+                                      badge: 'BEO Officer',
                                       role: UserRole.officer,
                                     ),
                                   ],

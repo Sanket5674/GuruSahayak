@@ -9,6 +9,8 @@ class CircularTask {
   final List<String> checklist;
   bool isCompleted;
   String? proofRemarks;
+  String assignedTo;
+  String status; // 'Pending', 'In Progress', 'Completed'
 
   CircularTask({
     required this.id,
@@ -21,6 +23,8 @@ class CircularTask {
     required this.checklist,
     this.isCompleted = false,
     this.proofRemarks,
+    this.assignedTo = 'All Staff',
+    this.status = 'Pending',
   });
 
   Map<String, dynamic> toMap() {
@@ -35,10 +39,13 @@ class CircularTask {
       'checklist': checklist.join('|'),
       'isCompleted': isCompleted ? 1 : 0,
       'proofRemarks': proofRemarks ?? '',
+      'assignedTo': assignedTo,
+      'status': status,
     };
   }
 
   factory CircularTask.fromMap(Map<String, dynamic> map) {
+    final completed = map['isCompleted'] == 1 || map['isCompleted'] == true;
     return CircularTask(
       id: map['id'] ?? '',
       grNumber: map['grNumber'] ?? '',
@@ -48,8 +55,10 @@ class CircularTask {
       deadline: map['deadline'] ?? '',
       priority: map['priority'] ?? 'normal',
       checklist: (map['checklist'] as String?)?.split('|') ?? [],
-      isCompleted: map['isCompleted'] == 1 || map['isCompleted'] == true,
+      isCompleted: completed,
       proofRemarks: map['proofRemarks'],
+      assignedTo: map['assignedTo'] ?? 'All Staff',
+      status: map['status'] ?? (completed ? 'Completed' : 'Pending'),
     );
   }
 }
